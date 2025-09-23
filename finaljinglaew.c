@@ -94,18 +94,7 @@ void search() {
     scanf("%s",keyword);
     int keyword_num = atoi(keyword);
 
-    while(fgets(line_temp,sizeof(line_temp),fp)) {
-        if(sscanf(line_temp,"%[^,],%[^,],%d,%d",temp_name,temp_type,date_start,date_end) == 4) {
-            if(strcasestr(temp_name,keyword) || strcasestr(temp_type,keyword) || date_start == keyword_num || date_end == keyword_num) {
-                printf("%s",line_temp);
-                found++;
-            }
-        }
-    }
-    if(found == 0){
-            printf("NO matching data found\n");
-        }
-    fclose(fp);
+    
 
 }
 
