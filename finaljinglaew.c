@@ -1,7 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include<ctype.h>
 #define keep 50
     char name[keep][15];
     char leave_type[keep][20];
@@ -79,6 +78,7 @@ void read_file() {
     fclose(r);
 }
 
+//มีปัญหาอยู่ กำลังหาทางแก้
 void search() {
     FILE *fp = fopen("data.csv","r");
         if(fp==NULL) {
@@ -96,7 +96,7 @@ void search() {
 
     while(fgets(line_temp,sizeof(line_temp),fp)) {
         if(sscanf(line_temp,"%[^,],%[^,],%d,%d",temp_name,temp_type,date_start,date_end) == 4) {
-            if(strcasestr(temp_name,keyword) || strcasestr(temp_type,keyword) || date_start == keyword_num || date_end == keyword_num) {
+            if(strcmp(temp_name,keyword) == 0 || strcmp(temp_type,keyword) == 0 || date_start == keyword_num || date_end == keyword_num) {
                 printf("%s",line_temp);
                 found++;
             }
@@ -110,7 +110,7 @@ void search() {
 }
 
 int load() {
-    FILE *open = fopen("information.csv","r");
+    FILE *open = fopen("data.csv","r");
     if(open == NULL) return 0;
     
     int loaded = 0;
@@ -139,11 +139,11 @@ void add(int current_count) {
         }
         return;
     }
-    FILE *naku = fopen("information.csv","a");
-    printf("Enter name: ");
+    FILE *naku = fopen("data.csv","a");
+    printf("Enter name: \n");
     scanf("%s",name[index]);
 
-    printf("Enter leave type: ");
+    printf("Enter leave type: \n");
     scanf("%s",leave_type[index]);
 
     printf("Enter start date(ex.20251227): \n");
@@ -190,6 +190,7 @@ int main() {
 
             case 3:
             printf("Search\n");
+            search();
             break;
 
             case 4:
