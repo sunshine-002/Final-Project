@@ -1,6 +1,4 @@
 #include<stdio.h>
-
-#include<stdio.h>
 #define keep 100
     char employee_name[keep][15];
     char leavetype[keep][20];
@@ -96,55 +94,3 @@ void add(int current_count) {
     printf("Added succesfully");
 }
 
-void read();
-    
-
-int main() {
-    
-    int choice;
-
-    display_menu();
-    char temp[300];
-
-    printf("Choose an option 1-7 (0 for exit)");
-    scanf("%d", &choice);
-    
-    switch (choice) {
-        case 1:
-        printf("Save file to csv: \n");
-        save_file();
-            break;
-
-        case 2:
-        printf("Read file csc: \n");
-            break;
-
-        case 3:
-            printf("Add information: \n");
-            int count = load();
-            add(count);
-            return 0;
-            break;
-
-        case 4:
-            printf("Search information: \n");
-            break;
-
-        case 5:
-            printf("Update information: \n");
-            break;
-
-        case 6:
-            printf("Delete information: \n");
-            break;
-        
-        case 0:
-            printf("Exit program");
-            break;
-
-        default:
-            printf("Enter choice again");
-        }
-
-        return 0;
-}

@@ -1,8 +1,14 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
+#include<ctype.h>
+#define keep 50
+    char name[keep][15];
+    char leave_type[keep][20];
+    int start[keep];
+    int end[keep];
 
 //DISPLAY MENU
-
 int display_menu() {
     printf("\033[1m --MENU-- \033[0m \n");
     printf("1.Save file\n");
@@ -32,7 +38,6 @@ void ask_again() {
 }
 
 //MENU
-
 void save_file() {
     char temp[300];
     FILE *s = fopen("information.csv","r");
@@ -60,15 +65,105 @@ void read_file() {
     }
 
     char temp[300];
+    int naku = 0;
+
     while(fgets(temp,sizeof(temp),r)) {
         printf("%s",temp);
+        naku++;
     }
+
+    if(naku == 0) {
+        printf("No data found\n");
+    }
+    
     fclose(r);
+}
+
+void search() {
+    FILE *fp = fopen("data.csv","r");
+        if(fp==NULL) {
+        printf("Error: Unable to open file for searching.\n");
+        return;
+    }
+    char line_temp[50], temp_name[20], temp_type[20];
+    int date_start, date_end;
+    int found = 0;
+    char keyword[20];
+
+    printf("Enter keyword to search : \n");
+    scanf("%s",keyword);
+    int keyword_num = atoi(keyword);
+
+    while(fgets(line_temp,sizeof(line_temp),fp)) {
+        if(sscanf(line_temp,"%[^,],%[^,],%d,%d",temp_name,temp_type,date_start,date_end) == 4) {
+            if(strcasestr(temp_name,keyword) || strcasestr(temp_type,keyword) || date_start == keyword_num || date_end == keyword_num) {
+                printf("%s",line_temp);
+                found++;
+            }
+        }
+    }
+    if(found == 0){
+            printf("NO matching data found\n");
+        }
+    fclose(fp);
+
+}
+
+int load() {
+    FILE *open = fopen("information.csv","r");
+    if(open == NULL) return 0;
+    
+    int loaded = 0;
+    while(fscanf(open,"%[^,],%[^,],%d,%d",name[loaded],leave_type[loaded],&start[loaded],&end[loaded]) == 4){
+        loaded++;
+        if(loaded >= keep ) break;
+    }
+    fclose(open);
+    return loaded;
+}
+void add(int current_count) {
+    int index = -1;
+
+    for(int i=0; i < keep; i++) {
+        if(name[i][0] == '\0') {
+            index = i;
+            break;
+        }
+    }
+    if( index == -1 ) {
+        if(current_count >= keep ) {
+            printf("DATA FULL\n");
+        }
+        else {
+            printf("SOMETHING WRONG\n");
+        }
+        return;
+    }
+    FILE *naku = fopen("information.csv","a");
+    printf("Enter name: ");
+    scanf("%s",name[index]);
+
+    printf("Enter leave type: ");
+    scanf("%s",leave_type[index]);
+
+    printf("Enter start date(ex.20251227): \n");
+    scanf("%d",&start[index]);
+
+    printf("Enter end date(ex'20251231): \n");
+    scanf("%d",&end[index]);
+
+    if(naku != NULL){
+        fprintf(naku,"%s,%s,%d,%d\n",name[index],leave_type[index],start[index],end[index]);
+        fclose(naku);
+    } else {
+        printf("Can not add information\n");
+    }
+
+    printf("Added succesfully");
 }
 
 
 //MAIN
-
 int main() {
     
     int choice_is_calling ;
@@ -99,6 +194,8 @@ int main() {
 
             case 4:
             printf("Add\n");
+            int count = load();
+            add(count);
             break;
 
             case 5:
