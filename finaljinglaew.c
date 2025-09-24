@@ -10,6 +10,7 @@
 //DISPLAY MENU
 int display_menu() {
     printf("\033[1m --MENU-- \033[0m \n");
+    printf("PLESE SAVE FILE BEFORE CHOOSE OTHER OPTIONS (press 1)\n");
     printf("1.Save file\n");
     printf("2.Read file\n");
     printf("3.Search\n");
@@ -86,7 +87,6 @@ void search() {
         return;
     }
     char line_temp[50], temp_name[20], temp_type[20];
-    int date_start, date_end;
     int found = 0;
     char keyword[20];
 
@@ -95,8 +95,8 @@ void search() {
     int keyword_num = atoi(keyword);
 
     while(fgets(line_temp,sizeof(line_temp),fp)) {
-        if(sscanf(line_temp,"%[^,],%[^,],%d,%d",temp_name,temp_type,date_start,date_end) == 4) {
-            if(strcmp(temp_name,keyword) == 0 || strcmp(temp_type,keyword) == 0 || date_start == keyword_num || date_end == keyword_num) {
+        if(sscanf(line_temp,"%[^,],%[^,]",temp_name,temp_type) == 2) {
+            if(strcmp(temp_name,keyword) == 0 || strcmp(temp_type,keyword) == 0 ) {
                 printf("%s",line_temp);
                 found++;
             }
