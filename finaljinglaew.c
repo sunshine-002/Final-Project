@@ -92,7 +92,6 @@ void search() {
 
     printf("Enter keyword to search : \n");
     scanf("%s",keyword);
-    int keyword_num = atoi(keyword);
 
     while(fgets(line_temp,sizeof(line_temp),fp)) {
         if(sscanf(line_temp,"%[^,],%[^,]",temp_name,temp_type) == 2) {
