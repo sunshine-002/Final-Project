@@ -17,23 +17,34 @@ int display_menu() {
     printf("4.Add information\n");
     printf("5.Delete information\n");
     printf("6.Update information\n");
+    printf("7.Unit test\n");
+    printf("8.End to end test\n");
     return 0;
 }
 
 int choice() {
     int selected_choice;
-    printf("Choose choice 1-6 (0 for exit) : \n");
+    printf("Choose choice 1-8 (0 for exit) : \n");
     scanf("%d",&selected_choice);
     return selected_choice;
 }
 
 void ask_again() {
     char again;
-    printf("\033[1mDo you want to return to menu? (y/n): \033[0m\n");
-    scanf(" %c",&again);
+    while(1) {
+        printf("\033[1m DO YOU WANT TO RETURN TO MENU (y/n)?\033[0m");
+        scanf(" %c",&again);
 
-    if(again == 'n' || again == 'N') {
-        exit(0);
+        if(again == 'y' || again == 'Y') {
+            system("cls");
+            break;
+        }
+        else if(again == 'n' || again == 'N') {
+            exit(0);
+        }
+        else{
+            printf("Invalid input.Please enter y/n");
+        }
     }
 }
 
@@ -41,9 +52,12 @@ void ask_again() {
 void save_file() {
     char temp[300];
     FILE *s = fopen("information.csv","r");
+    if( s == NULL ){
+        printf("File not found\n");
+    }
     FILE *save = fopen("data.csv","w");
-    if(s==NULL&&save==NULL) {
-        printf("Can not open file\n");
+    if(save==NULL) {
+        printf("Can not open data.csv\n");
         return;
     }
 
@@ -79,31 +93,90 @@ void read_file() {
     fclose(r);
 }
 
-//มีปัญหาอยู่ กำลังหาทางแก้
 void search() {
     FILE *fp = fopen("data.csv","r");
         if(fp==NULL) {
         printf("Error: Unable to open file for searching.\n");
         return;
     }
-    char line_temp[50], temp_name[20], temp_type[20];
+    char line_temp[100], temp_name[20], temp_type[20];
     int found = 0;
     char keyword[20];
+    int choice;
 
-    printf("Enter keyword to search : \n");
-    scanf("%s",keyword);
+    printf("Which keyword do you want to search\n");
+    printf("1.Name\n");
+    printf("2.Leavetype\n");
+    printf("Enter choice 1,2 \n");
+    scanf("%d",&choice);
 
-    while(fgets(line_temp,sizeof(line_temp),fp)) {
-        if(sscanf(line_temp,"%[^,],%[^,]",temp_name,temp_type) == 2) {
-            if(strcmp(temp_name,keyword) == 0 || strcmp(temp_type,keyword) == 0 ) {
-                printf("%s",line_temp);
-                found++;
+    if(choice == 1) {
+        printf("Enter name:\n");
+        scanf("%s",keyword);
+
+        while(fgets(line_temp,sizeof(line_temp),fp)) {
+            if(sscanf(line_temp,"%[^,],%[^,]",temp_name,temp_type) == 2) {
+                if(strcmp(temp_name,keyword) == 0 ) {
+                    printf("%s",line_temp);
+                    found++;
+                }
             }
         }
     }
-    if(found == 0){
-            printf("NO matching data found\n");
+
+    else if(choice == 2) {
+        int leave_choice;
+
+        printf("\033[1m --LEAVE TYPE-- \033[0m \n");
+        printf("1.Vacation\n");
+        printf("2.Sick Leave\n");
+        printf("3.Manitary Leave\n");
+        printf("4.Personal Leave\n");
+        printf("5.Annual Leave\n");
+        printf("Enter choice 1-6 \n");
+        scanf("%d",&leave_choice);
+
+        switch(leave_choice) {
+            case 1:
+            strcpy(keyword,"Vacation");
+            break;
+
+            case 2:
+            strcpy(keyword,"Sick Leave");
+            break;
+
+            case 3:
+            strcpy(keyword,"Manitary Leave");
+            break;
+
+            case 4:
+            strcpy(keyword,"Personal Leave");
+            break;
+
+            case 5:
+            strcpy(keyword,"Annual Leave");
+            break;
+
+            default:
+                printf("Invalid choice");
+                fclose(fp);
+                return;
         }
+        while(fgets(line_temp,sizeof(line_temp),fp)) {
+            if(sscanf(line_temp,"%[^,],%[^,]",temp_name,temp_type) == 2) {
+                if(strcmp(temp_type,keyword) == 0) {
+                    printf("%s",line_temp);
+                    found++;
+                }
+            }
+        }
+    } else {
+        printf("Invalid search choice \n");
+    }
+    if(found == 0) {
+        printf("No matching data found\n");
+    }
+    
     fclose(fp);
 
 }
