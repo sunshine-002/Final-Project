@@ -690,6 +690,8 @@ int main() {
             case 8:
             printf("E2E testing...\n");
             Sleep(2000);
+            printf("Adding information\ndeleting information\nsearching information...\n");
+            Sleep(2000);
             e2e_test();
             break;
 
