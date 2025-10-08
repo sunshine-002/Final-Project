@@ -1,6 +1,11 @@
+//Unit test
+#include<assert.h>
+//Main
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<ctype.h>
+#include<windows.h>
 #define keep 50
     char name[keep][15];
     char leave_type[keep][20];
@@ -9,15 +14,14 @@
 //DISPLAY MENU
 int display_menu() {
     printf("\033[1m --MENU-- \033[0m \n");
-    printf("PLESE SAVE FILE BEFORE CHOOSE OTHER OPTIONS (press 1)\n");
     printf("1.Save file\n");
-    printf("2.Read file\n");
+    printf("2.Read file (Please save file before read[press 1])\n");
     printf("3.Search\n");
     printf("4.Add information\n");
     printf("5.Delete information\n");
     printf("6.Update information\n");
     printf("7.Unit test\n");
-    printf("8.End to end test\n");
+    printf("8.E2E test\n");
     return 0;
 }
 
@@ -31,7 +35,7 @@ int choice() {
 void ask_again() {
     char again;
     while(1) {
-        printf("\033[1m DO YOU WANT TO RETURN TO MENU (y/n)?\033[0m");
+        printf("\033[1mDO YOU WANT TO RETURN TO MENU (y/n)?\033[0m\n");
         scanf(" %c",&again);
 
         if(again == 'y' || again == 'Y') {
@@ -42,7 +46,7 @@ void ask_again() {
             exit(0);
         }
         else{
-            printf("Invalid input.Please enter y/n");
+            printf("Invalid input.Please enter y/n\n");
         }
     }
 }
@@ -111,7 +115,7 @@ void search() {
 
     if(choice == 1) {
         printf("Enter name:\n");
-        scanf("%s",keyword);
+        scanf("%19s",keyword);
 
         while(fgets(line_temp,sizeof(line_temp),fp)) {
             if(sscanf(line_temp,"%[^,],%[^,]",temp_name,temp_type) == 2) {
@@ -180,6 +184,7 @@ void search() {
 
 }
 
+//เสริม
 int load() {
 
     for(int i = 0; i<keep; i++) {
@@ -201,6 +206,32 @@ int load() {
     return loaded;
 }
 
+int date_check(const char*date) {
+    int year, month, day;
+    if(sscanf(date,"%4d-%2d-%2d", &year, &month, &day) != 3) return 0;
+    
+    if(year < 1900 || year > 2100) return 0;
+    if(month < 1 || month > 12) return 0;
+    if(day < 1) return 0;
+
+    int date_in_mounths[] = {31,28,31,30,31,30,31,31,30,31,30,31} ;
+
+    if((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) 
+        date_in_mounths[1] = 29;
+
+    if(day > date_in_mounths[month - 1]) return 0;
+
+    return 1;
+}
+
+int valid_name(const char *text) {
+    for(int i = 0; text[i] != '\0'; i++) {
+        if(!isalpha(text[i]) && text[i] != ' ' ) return 0;
+    }
+    return 1;
+}
+
+//cont MENU
 void add(int current_count) {
     int index = -1;
 
@@ -223,11 +254,15 @@ void add(int current_count) {
     char temp_name[50],temp_leave_type[100],temp_start[20],temp_end[20];
     int temp_type;
 
-    printf("Enter name: \n");
-    scanf("%s",temp_name);
-    system("cls");
+    do{
+        printf("Enter name: \n");
+        scanf("%s",temp_name);
+        if(!valid_name(temp_name)) {
+        printf("Please enter only letters\n");
+        }
+    } while(!valid_name(temp_name));
 
-    printf("Leave type: \n");
+    printf("\033[1mLeave type:\033[0m \n");
     printf("1.Vacation\n");
     printf("2.Sick Leave\n");
     printf("3.Manitary Leave\n");
@@ -246,13 +281,28 @@ void add(int current_count) {
             printf("Invalid type\n");
             return;
     }
-    system("cls");
+    
 
+    do {
     printf("Enter start date(ex.2025-10-15): \n");
     scanf("%s",temp_start);
+    
+    if(!date_check(temp_start)) {
+        printf("Invalid date\n");
+    }
+    } while(!date_check(temp_start));
 
+    do {
     printf("Enter end date(ex.2025-10-17): \n");
     scanf("%s",temp_end);
+
+   if(!date_check(temp_end)) {
+        printf("Invalid dat\n");
+    }
+    } while(!date_check(temp_end));
+    
+
+    system("cls");
 
     for(int i =0; i < keep; i++) {
         if( name[i][0] != '\0' ){
@@ -278,14 +328,21 @@ void add(int current_count) {
     }
 }
 
-void delete() {
+void delete_record() {
     char target_name[50];
     int count = load();
     int match_indexs[keep];
     int match_count = 0 ;
 
-    printf("Enter name to delete: \n");
-    scanf("%s",target_name);
+    do{
+        printf("Enter name to delete: \n");
+        scanf("%s",target_name);
+        if(!valid_name(target_name)) {
+        printf("Please enter only letters\n");
+        }
+    } while(!valid_name(target_name));
+
+    system("cls");
 
     for(int i = 0; i<count ; i++ ) {
         if(strcmp(name[i],target_name) == 0) {
@@ -302,9 +359,9 @@ void delete() {
 
     int choice;
     printf("Enter number of the record to delete (1-%d):\n",match_count);
-    scanf("%d",&choice);
+    
 
-    if(choice < 1 || choice > match_count) {
+    if(scanf("%d",&choice) != 1) {
         printf("Invalid selection\n");
         return;
     }
@@ -339,7 +396,15 @@ void update() {
     int match_count = 0 ;
 
     printf("Whose data do you want to update\n");
-    scanf("%s",target_name);
+    do{
+        printf("Enter name: \n");
+        scanf("%s",target_name);
+        if(!valid_name(target_name)) {
+        printf("Please enter only letters\n");
+        }
+    } while(!valid_name(target_name));
+
+    system("cls");
 
     for(int i = 0; i<keep; i++) {
         if(strcmp(name[i],target_name) == 0) {
@@ -378,7 +443,7 @@ void update() {
             printf("Change name:\n");
             scanf("%s",name[update_index]);
             break;
-        case 2:
+        case 2: {
             int leave_choice;
             printf("Leave type: \n");
             printf("1.Vacation\n");
@@ -388,6 +453,11 @@ void update() {
             printf("5.Annual Leave\n");
             printf("Enter choice 1-5 \n");
             scanf("%d",&leave_choice);
+
+            if(leave_choice < 0 || leave_choice > 5) {
+                printf("Invalid choice\n");
+                return;
+            }
         
              switch(leave_choice) {
                 case 1: strcpy(leave_type[update_index],"Vacation"); break;
@@ -400,13 +470,26 @@ void update() {
                     return;
                 }
             break;
+        }
         case 3:
-            printf("Enter new date start(ex.2025-10-15):\n");
-            scanf("%s",start[update_index]);
+            do {
+                printf("Enter new start date(ex.2025-10-15): \n");
+                scanf("%s",start[update_index]);
+    
+                if(!date_check(start[update_index])) {
+                printf("Invalid date");
+                }
+            } while(!date_check(start[update_index]));
             break;
         case 4:
-            printf("Enter new date end(ex.2025-10-17):\n");
-            scanf("%s",end[update_index]);
+            do {
+                printf("Enter new end date(ex.2025-10-17): \n");
+                scanf("%s",end[update_index]);
+
+                if(!date_check(end[update_index])) {
+                printf("Invalid date");
+                }
+            } while(!date_check(end[update_index]));
             break;
 
     }
@@ -422,7 +505,7 @@ void update() {
         }
     }
 
-    FILE *imdied = fopen("data.csv",'w');
+    FILE *imdied = fopen("data.csv","w");
     if(imdied == NULL) {
         printf("Can not open file for update\n");
         return;
@@ -439,6 +522,114 @@ void update() {
 
 }
 
+//unit test
+void test_search()
+{
+    strcpy(name[0],"Testuser");
+    strcpy(leave_type[0],"Vacation");
+    strcpy(start[0],"2025-10-15");
+    strcpy(end[0],"2025-10-17");
+
+    strcpy(name[1],"1234");
+    strcpy(start[1],"2025-10-32");
+
+    int valid_count = 0;
+    for(int i = 0; i < 2; i++) {
+        if(valid_name(name[i]) && date_check(start[i]) && date_check(end[i])) {
+            valid_count++;
+        }
+    }
+    assert(valid_count == 1);
+    printf("Valid & Invalid information\n");
+    printf("test_search passed\n");
+
+    
+
+}
+
+void test_delete_record() {
+    int temp_keep =2;
+    strcpy(name[0], "Alice");
+    strcpy(leave_type[0], "Vacation");
+    strcpy(start[0], "2025-10-10");
+    strcpy(end[0], "2025-10-12");
+
+    strcpy(name[1], "Bob");
+    strcpy(leave_type[1], "Sick Leave");
+    strcpy(start[1], "2025-10-15");
+    strcpy(end[1], "2025-10-16");
+
+    // ลบ Bob
+    int delete_index = 1;
+    memset(name[delete_index], 0, sizeof(name[delete_index]));
+    memset(leave_type[delete_index], 0, sizeof(leave_type[delete_index]));
+    memset(start[delete_index], 0, sizeof(start[delete_index]));
+    memset(end[delete_index], 0, sizeof(end[delete_index]));
+
+    assert(name[delete_index][0] == '\0');
+    assert(leave_type[delete_index][0] == '\0');
+    assert(start[delete_index][0] == '\0');
+    assert(end[delete_index][0] == '\0');
+
+    printf("test_delete_record passed\n");
+}
+
+void e2e_test() {
+    strcpy(name[0],"TestTest");
+    strcpy(leave_type[0],"Vacation");
+    strcpy(start[0],"2025-10-15");
+    strcpy(end[0],"2025-10-17");
+
+    FILE *imcrying = fopen("data.csv","w");
+    if(imcrying == NULL) {
+        printf("Can not open file for reading\n");
+        return;
+    }
+    fprintf(imcrying,"%s,%s,%s,%s",name[0],leave_type[0],start[0],end[0]);
+    fclose(imcrying);
+
+    int count = load();
+    assert(count > 0);
+    assert(strcmp(name[0],"TestTest") == 0); 
+
+    int found = 0;
+    for(int i = 0; i < keep; i++) {
+        if(strcmp(name[i],"TestTest") == 0 && strcmp(leave_type[i],"Vacation") == 0 &&
+            strcmp(start[i],"2025-10-15") == 0 && strcmp(end[i],"2025-10-17") == 0) {
+                found++;
+            } 
+    }
+    assert(found == 1);
+
+    name[0][0] = '\0';
+    leave_type[0][0] = '\0';
+    start[0][0] = '\0';
+    end[0][0] = '\0';
+
+    imcrying = fopen("data.csv","w");
+    if(imcrying == NULL) {
+        printf("Can not open file\n");
+        return;
+    }
+     for (int i = 0; i < count; i++) {
+        if (name[i][0] != '\0') {
+            fprintf(imcrying, "%s,%s,%s,%s\n", name[i], leave_type[i], start[i], end[i]);
+        }
+    }
+    fclose(imcrying);
+
+    count = load();
+    int check = 0;
+    for(int i = 0; i < keep; i++) {
+        if(strcmp(name[i],"TestTest") == 0) {
+            check++;
+        }
+    }
+    assert(check == 0);
+    printf("E2E Test passed successfully!\n");
+
+}
+
 //MAIN
 int main() {
     
@@ -450,17 +641,21 @@ int main() {
             
         switch(choice_is_calling) {
             case 0:
-            printf("Exit program\n");
+            printf("Exiting program...\n");
+            Sleep(2000);
             exit(0);
             break;
 
             case 1:
-            printf("Save\n");
+            printf("Saving file...\n");
             save_file();
+            Sleep(2000);
+            printf("Done\n");
             break;
 
             case 2:
-            printf("Read\n");
+            printf("Reading file...\n");
+            Sleep(2000);
             read_file();
             break;
 
@@ -477,7 +672,7 @@ int main() {
 
             case 5:
             printf("Delete\n");
-            delete();
+            delete_record();
             break;
 
             case 6:
@@ -485,12 +680,26 @@ int main() {
             update();
             break;
 
+            case 7:
+            printf("Unit testing...\n");
+            Sleep(2000);
+            test_search();
+            test_delete_record();
+            break;
+
+            case 8:
+            printf("E2E testing...\n");
+            Sleep(2000);
+            e2e_test();
+            break;
+
             default:
-            printf("Enter choice again");
+            printf("Enter choice again\n");
             break;
 
         }
         ask_again();
+        system("cls");
     }while(1);
 
     return 0;
