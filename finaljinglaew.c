@@ -4,8 +4,7 @@
 #define keep 50
     char name[keep][15];
     char leave_type[keep][20];
-    int start[keep];
-    int end[keep];
+    char start[keep][20],end[keep][20];
 
 //DISPLAY MENU
 int display_menu() {
@@ -133,7 +132,7 @@ void search() {
         printf("3.Manitary Leave\n");
         printf("4.Personal Leave\n");
         printf("5.Annual Leave\n");
-        printf("Enter choice 1-6 \n");
+        printf("Enter choice 1-5 \n");
         scanf("%d",&leave_choice);
 
         switch(leave_choice) {
@@ -182,17 +181,26 @@ void search() {
 }
 
 int load() {
+
+    for(int i = 0; i<keep; i++) {
+        name[i][0] = '\0';
+        leave_type[i][0] = '\0';
+        start[i][0] = '\0';
+        end[i][0] = '\0';
+    }
+
     FILE *open = fopen("data.csv","r");
     if(open == NULL) return 0;
     
     int loaded = 0;
-    while(fscanf(open,"%[^,],%[^,],%d,%d",name[loaded],leave_type[loaded],&start[loaded],&end[loaded]) == 4){
+    while(fscanf(open,"%[^,],%[^,],%[^,],%[^,\n]\n",name[loaded],leave_type[loaded],start[loaded],end[loaded]) == 4){
         loaded++;
         if(loaded >= keep ) break;
     }
     fclose(open);
     return loaded;
 }
+
 void add(int current_count) {
     int index = -1;
 
@@ -211,29 +219,225 @@ void add(int current_count) {
         }
         return;
     }
-    FILE *naku = fopen("data.csv","a");
+    
+    char temp_name[50],temp_leave_type[100],temp_start[20],temp_end[20];
+    int temp_type;
+
     printf("Enter name: \n");
-    scanf("%s",name[index]);
+    scanf("%s",temp_name);
+    system("cls");
 
-    printf("Enter leave type: \n");
-    scanf("%s",leave_type[index]);
+    printf("Leave type: \n");
+    printf("1.Vacation\n");
+    printf("2.Sick Leave\n");
+    printf("3.Manitary Leave\n");
+    printf("4.Personal Leave\n");
+    printf("5.Annual Leave\n");
+    printf("Enter choice 1-5 \n");
+    scanf("%d",&temp_type);
 
-    printf("Enter start date(ex.20251227): \n");
-    scanf("%d",&start[index]);
-
-    printf("Enter end date(ex'20251231): \n");
-    scanf("%d",&end[index]);
-
-    if(naku != NULL){
-        fprintf(naku,"%s,%s,%d,%d\n",name[index],leave_type[index],start[index],end[index]);
-        fclose(naku);
-    } else {
-        printf("Can not add information\n");
+    switch(temp_type) {
+        case 1: strcpy(temp_leave_type,"Vacation"); break;
+        case 2: strcpy(temp_leave_type,"Sick Leave"); break;
+        case 3: strcpy(temp_leave_type,"Manitary Leave"); break;
+        case 4: strcpy(temp_leave_type,"Personal Leave"); break;
+        case 5: strcpy(temp_leave_type,"Annual Leave"); break;
+        default:
+            printf("Invalid type\n");
+            return;
     }
+    system("cls");
 
-    printf("Added succesfully");
+    printf("Enter start date(ex.2025-10-15): \n");
+    scanf("%s",temp_start);
+
+    printf("Enter end date(ex.2025-10-17): \n");
+    scanf("%s",temp_end);
+
+    for(int i =0; i < keep; i++) {
+        if( name[i][0] != '\0' ){
+            if(strcmp(name[i],temp_name) == 0 && strcmp(leave_type[i],temp_leave_type) == 0 
+            && strcmp(start[i],temp_start) == 0 && strcmp(end[i],temp_end) == 0) {
+                printf("There has the same information\n");
+                return;
+            }
+        }
+    }
+    strcpy(name[index],temp_name);
+    strcpy(leave_type[index],temp_leave_type);
+    strcpy(start[index],temp_start);
+    strcpy(end[index],temp_end);
+
+    FILE*naku = fopen("data.csv","a");
+    if(naku != NULL) {
+        fprintf(naku,"%s,%s,%s,%s\n",temp_name,temp_leave_type,temp_start,temp_end);
+        fclose(naku);
+        printf("Add successfully\n");
+    } else {
+        printf("Can not add infoemation\n");
+    }
 }
 
+void delete() {
+    char target_name[50];
+    int count = load();
+    int match_indexs[keep];
+    int match_count = 0 ;
+
+    printf("Enter name to delete: \n");
+    scanf("%s",target_name);
+
+    for(int i = 0; i<count ; i++ ) {
+        if(strcmp(name[i],target_name) == 0) {
+            printf("%d. %s, %s, %s, %s\n", match_count+1, name[i], leave_type[i], start[i], end[i]);
+            match_indexs[match_count] = i;
+            match_count++;
+        }
+    }
+
+    if(match_count == 0) {
+        printf("No matching name found\n");
+        return;
+    }
+
+    int choice;
+    printf("Enter number of the record to delete (1-%d):\n",match_count);
+    scanf("%d",&choice);
+
+    if(choice < 1 || choice > match_count) {
+        printf("Invalid selection\n");
+        return;
+    }
+
+    int delete_index = match_indexs[choice - 1];
+
+    name[delete_index][0] = '\0';
+    leave_type[delete_index][0] = '\0';
+    start[delete_index][0] = '\0';
+    end[delete_index][0] = '\0';
+
+    FILE *fp = fopen("data.csv","w");
+    if( fp == NULL ) {
+        printf("Can not open file for writing\n");
+        return;
+    }
+
+    for(int i = 0; i < count; i++) {
+        if(name[i][0] != '\0') {
+            fprintf(fp, "%s,%s,%s,%s\n", name[i], leave_type[i], start[i], end[i]);
+        }
+    }
+    fclose(fp);
+    printf("Record deleted successfully\n");
+
+}
+
+void update() {
+    char target_name[50];
+    int count = load();
+    int match_indexs[keep];
+    int match_count = 0 ;
+
+    printf("Whose data do you want to update\n");
+    scanf("%s",target_name);
+
+    for(int i = 0; i<keep; i++) {
+        if(strcmp(name[i],target_name) == 0) {
+            printf("%d. %s,%s,%s,%s\n",match_count+1, name[i], leave_type[i], start[i], end[i]);
+            match_indexs[match_count] = i;
+            match_count++;
+        }
+    }
+    
+    if(match_count == 0) {
+        printf("No matching name found\n");
+        return;
+    }
+
+    int choice;
+    printf("Enter number of the record to delete (1-%d):\n",match_count);
+    scanf("%d",&choice);
+
+    if(choice < 1 || choice > match_count) {
+        printf("Invalid selection\n");
+        return;
+    }
+
+    int update_index = match_indexs[choice - 1];
+
+    int choice_update;
+    printf("What do you want to update\n");
+    printf("1.Name\n");
+    printf("2.Leave type\n");
+    printf("3.Start date\n");
+    printf("4.End date\n");
+    scanf("%d",&choice_update);
+
+    switch(choice_update) {
+        case 1: 
+            printf("Change name:\n");
+            scanf("%s",name[update_index]);
+            break;
+        case 2:
+            int leave_choice;
+            printf("Leave type: \n");
+            printf("1.Vacation\n");
+            printf("2.Sick Leave\n");
+            printf("3.Manitary Leave\n");
+            printf("4.Personal Leave\n");
+            printf("5.Annual Leave\n");
+            printf("Enter choice 1-5 \n");
+            scanf("%d",&leave_choice);
+        
+             switch(leave_choice) {
+                case 1: strcpy(leave_type[update_index],"Vacation"); break;
+                case 2: strcpy(leave_type[update_index],"Sick Leave"); break;
+                case 3: strcpy(leave_type[update_index],"Manitary Leave"); break;
+                case 4: strcpy(leave_type[update_index],"Personal Leave"); break;
+                case 5: strcpy(leave_type[update_index],"Annual Leave"); break;
+                default:
+                    printf("Invalid leave type\n");
+                    return;
+                }
+            break;
+        case 3:
+            printf("Enter new date start(ex.2025-10-15):\n");
+            scanf("%s",start[update_index]);
+            break;
+        case 4:
+            printf("Enter new date end(ex.2025-10-17):\n");
+            scanf("%s",end[update_index]);
+            break;
+
+    }
+
+    for(int i = 0; i < count; i++) {
+        if(i != update_index &&
+           strcmp(name[i], name[update_index]) == 0 &&
+           strcmp(leave_type[i], leave_type[update_index]) == 0 &&
+           strcmp(start[i], start[update_index]) == 0 &&
+           strcmp(end[i], end[update_index]) == 0) {
+            printf("This updated information already exists in another record.\n");
+            return;
+        }
+    }
+
+    FILE *imdied = fopen("data.csv",'w');
+    if(imdied == NULL) {
+        printf("Can not open file for update\n");
+        return;
+    }
+
+    for(int i = 0; i < keep; i++) {
+        if(name[i][0] != '\0') {
+            fprintf(imdied,"%s,%s,%s,%s",name[i], leave_type[i], start[i], end[i]);
+        }
+    }
+    fclose(imdied);
+    printf("Update successfully\n");
+
+
+}
 
 //MAIN
 int main() {
@@ -273,10 +477,12 @@ int main() {
 
             case 5:
             printf("Delete\n");
+            delete();
             break;
 
             case 6:
             printf("Update\n");
+            update();
             break;
 
             default:
