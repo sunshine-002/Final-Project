@@ -10,6 +10,9 @@
     char name[keep][15];
     char leave_type[keep][20];
     char start[keep][20],end[keep][20];
+//unit test&e2e
+#include "unit_test.h"
+#include "e2e_test.h"
 
 //DISPLAY MENU
 int display_menu() {
@@ -522,113 +525,9 @@ void update() {
 
 }
 
-//unit test
-void test_search()
-{
-    strcpy(name[0],"Testuser");
-    strcpy(leave_type[0],"Vacation");
-    strcpy(start[0],"2025-10-15");
-    strcpy(end[0],"2025-10-17");
 
-    strcpy(name[1],"1234");
-    strcpy(start[1],"2025-10-32");
 
-    int valid_count = 0;
-    for(int i = 0; i < 2; i++) {
-        if(valid_name(name[i]) && date_check(start[i]) && date_check(end[i])) {
-            valid_count++;
-        }
-    }
-    assert(valid_count == 1);
-    printf("Valid & Invalid information\n");
-    printf("test_search passed\n");
 
-    
-
-}
-
-void test_delete_record() {
-    int temp_keep =2;
-    strcpy(name[0], "Alice");
-    strcpy(leave_type[0], "Vacation");
-    strcpy(start[0], "2025-10-10");
-    strcpy(end[0], "2025-10-12");
-
-    strcpy(name[1], "Bob");
-    strcpy(leave_type[1], "Sick Leave");
-    strcpy(start[1], "2025-10-15");
-    strcpy(end[1], "2025-10-16");
-
-    // ลบ Bob
-    int delete_index = 1;
-    memset(name[delete_index], 0, sizeof(name[delete_index]));
-    memset(leave_type[delete_index], 0, sizeof(leave_type[delete_index]));
-    memset(start[delete_index], 0, sizeof(start[delete_index]));
-    memset(end[delete_index], 0, sizeof(end[delete_index]));
-
-    assert(name[delete_index][0] == '\0');
-    assert(leave_type[delete_index][0] == '\0');
-    assert(start[delete_index][0] == '\0');
-    assert(end[delete_index][0] == '\0');
-
-    printf("test_delete_record passed\n");
-}
-
-void e2e_test() {
-    strcpy(name[0],"TestTest");
-    strcpy(leave_type[0],"Vacation");
-    strcpy(start[0],"2025-10-15");
-    strcpy(end[0],"2025-10-17");
-
-    FILE *imcrying = fopen("data.csv","w");
-    if(imcrying == NULL) {
-        printf("Can not open file for reading\n");
-        return;
-    }
-    fprintf(imcrying,"%s,%s,%s,%s",name[0],leave_type[0],start[0],end[0]);
-    fclose(imcrying);
-
-    int count = load();
-    assert(count > 0);
-    assert(strcmp(name[0],"TestTest") == 0); 
-
-    int found = 0;
-    for(int i = 0; i < keep; i++) {
-        if(strcmp(name[i],"TestTest") == 0 && strcmp(leave_type[i],"Vacation") == 0 &&
-            strcmp(start[i],"2025-10-15") == 0 && strcmp(end[i],"2025-10-17") == 0) {
-                found++;
-            } 
-    }
-    assert(found == 1);
-
-    name[0][0] = '\0';
-    leave_type[0][0] = '\0';
-    start[0][0] = '\0';
-    end[0][0] = '\0';
-
-    imcrying = fopen("data.csv","w");
-    if(imcrying == NULL) {
-        printf("Can not open file\n");
-        return;
-    }
-     for (int i = 0; i < count; i++) {
-        if (name[i][0] != '\0') {
-            fprintf(imcrying, "%s,%s,%s,%s\n", name[i], leave_type[i], start[i], end[i]);
-        }
-    }
-    fclose(imcrying);
-
-    count = load();
-    int check = 0;
-    for(int i = 0; i < keep; i++) {
-        if(strcmp(name[i],"TestTest") == 0) {
-            check++;
-        }
-    }
-    assert(check == 0);
-    printf("E2E Test passed successfully!\n");
-
-}
 
 //MAIN
 int main() {
