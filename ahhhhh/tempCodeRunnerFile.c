@@ -1,1 +1,0 @@
-int valid_name(const char *text) {
